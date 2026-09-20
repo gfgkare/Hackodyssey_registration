@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AcademicYear {
+  FIRST_YEAR
+  SECOND_YEAR
+  THIRD_YEAR
+  FOURTH_YEAR
+}
+
+enum AccommodationType {
+  HOSTELLER
+  DAY_SCHOLAR
+}
+
+enum AdminAction {
+  ADMIN_LOGIN
+  ADMIN_LOGOUT
+  REGISTRATION_CONFIRMED
+  REGISTRATION_CANCELLED
+}
+
+enum AuditActorType {
+  ADMIN
+  SYSTEM
+}
+
+model Team {
+  id          String             @id @default(uuid())
+  teamName    String             @unique
+  institution String
+  category    String
+  status      RegistrationStatus @default(CONFIRMED)
+  confirmedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  members   TeamMember[]
+  auditLogs AuditLog[]
+}
+
+model TeamMember {
+  id                 String             @id @default(uuid())
+  teamId             String
+  fullName           String
+  registrationNumber String             @unique
+  collegeName        String?
+  email              String
+  mobile             String
+  gender             Gender?
+  academicYear       AcademicYear?
+  department         String
+  role               String
+  accommodationType  AccommodationType?
+  hostelName         String?
+  roomNumber         String?
+  wardenName         String?
+  wardenContact      String?
+  createdAt          DateTime           @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([email, mobile])
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  auditLogs AuditLog[]
+}
+
+model AuditLog {
+  id          String         @id @default(uuid())
+  action      AdminAction
+  actorType   AuditActorType
+  adminId     String?
+  teamId      String?
+  description String?
+  createdAt   DateTime       @default(now())
+
+  admin Admin? @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  team  Team?  @relation(fields: [teamId], references: [id], onDelete: SetNull)
+}

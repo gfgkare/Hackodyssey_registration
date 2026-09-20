@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Prisma
+*.db
+*.db-journal
+
+# Editor files
+.vscode/
+.idea/
+.DS_Store
+
+# OS files
+Thumbs.db
+
+# AI/editor-specific local folders
+backend/.agents/
+backend/.claude/
+backend/.cursor/
+backend/.devin/
+
+# Generated exports
+backend/*.csv
+backend/*.xlsx
+
+# Backup configuration files
+*.bak
