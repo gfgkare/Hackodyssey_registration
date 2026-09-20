@@ -3,6 +3,7 @@ import RegistrationForm from "./components/registration/RegistrationForm";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProtectedRoute from "./pages/admin/AdminProtectedRoute";
+import LandingPage from "./pages/LandingPage";
 
 function RegistrationPage() {
   return (
@@ -13,7 +14,7 @@ function RegistrationPage() {
             Hack Odyssey
           </h1>
 
-          <p className="mt-3 text-xl font-medium text-slate-700">
+          <p className="mt-3 text-xl font-medium text-slate-300">
             Hackathon Registration Portal
           </p>
 
@@ -32,7 +33,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<RegistrationPage />} />
+        <Route path="/" element={<LandingPage />} />
+
+        <Route path="/register" element={<RegistrationPage />} />
 
         <Route path="/gfghackadmin" element={<AdminLogin />} />
 
