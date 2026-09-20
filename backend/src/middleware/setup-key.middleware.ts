@@ -5,7 +5,7 @@ export function setupKeyMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  const providedKey = req.header("x-admin-setup-key");
+  const providedKey = req.header("x-setup-key");
   const configuredKey = process.env.ADMIN_SETUP_KEY;
 
   if (!configuredKey) {

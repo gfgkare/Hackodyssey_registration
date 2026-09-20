@@ -8,6 +8,63 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Team {
+  id          String             @id @default(uuid())
+  teamName    String             @unique
+  institution String
+  category    String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  confirmedAt DateTime?
+  status      RegistrationStatus @default(CONFIRMED)
+  auditLogs   AuditLog[]
+  members     TeamMember[]
+}
+
+model TeamMember {
+  id                 String             @id @default(uuid())
+  teamId             String
+  fullName           String
+  email              String
+  mobile             String
+  role               String
+  createdAt          DateTime           @default(now())
+  registrationNumber String             @unique
+  department         String
+  accommodationType  AccommodationType?
+  gender             Gender?
+  hostelName         String?
+  roomNumber         String?
+  wardenContact      String?
+  wardenName         String?
+  academicYear       AcademicYear?
+  collegeName        String?
+  team               Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([email, mobile])
+}
+
+model Admin {
+  id           String     @id @default(uuid())
+  username     String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  isActive     Boolean    @default(true)
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  adminId   String
+  teamId    String?
+  createdAt DateTime    @default(now())
+  details   String?
+  action    AuditAction
+  admin     Admin       @relation(fields: [adminId], references: [id])
+  team      Team?       @relation(fields: [teamId], references: [id])
+}
+
 enum RegistrationStatus {
   CONFIRMED
 }
@@ -34,65 +91,4 @@ enum AuditAction {
   ADMIN_LOGOUT
   REGISTRATION_CONFIRMED
   REGISTRATION_CANCELLED
-}
-
-model Team {
-  id          String             @id @default(uuid())
-  teamName    String             @unique
-  institution String
-  category    String
-  status      RegistrationStatus @default(CONFIRMED)
-  confirmedAt DateTime?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-
-  members   TeamMember[]
-  auditLogs AuditLog[]
-}
-
-model TeamMember {
-  id                 String             @id @default(uuid())
-  teamId             String
-  fullName           String
-  registrationNumber String             @unique
-  collegeName        String?
-  email              String
-  mobile             String
-  gender             Gender?
-  academicYear       AcademicYear?
-  department         String
-  role               String
-  accommodationType  AccommodationType?
-  hostelName         String?
-  roomNumber         String?
-  wardenName         String?
-  wardenContact      String?
-  createdAt          DateTime           @default(now())
-
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-
-  @@unique([email, mobile])
-}
-
-model Admin {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  passwordHash String
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  auditLogs AuditLog[]
-}
-
-model AuditLog {
-  id        String      @id @default(uuid())
-  adminId   String
-  action    AuditAction
-  teamId    String?
-  details   String?
-  createdAt DateTime    @default(now())
-
-  admin Admin @relation(fields: [adminId], references: [id])
-  team  Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
 }
