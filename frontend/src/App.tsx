@@ -1,30 +1,91 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import RegistrationForm from "./components/registration/RegistrationForm";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+
+// Admin pages (unchanged)
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProtectedRoute from "./pages/admin/AdminProtectedRoute";
 
-function RegistrationPage() {
+// Dedicated register page
+import RegisterPage from "./pages/RegisterPage";
+
+// Landing page sections
+import Navbar from "./components/landing/Navbar";
+import Hero from "./components/landing/Hero";
+import OpenToAll from "./components/landing/OpenToAll";
+import AboutEvent from "./components/landing/AboutEvent";
+import CollaboratingClubs from "./components/landing/CollaboratingClubs";
+import EventHighlights from "./components/landing/EventHighlights";
+import EventDetails from "./components/landing/EventDetails";
+import FAQ from "./components/landing/FAQ";
+import Contact from "./components/landing/Contact";
+import Footer from "./components/landing/Footer";
+import BackToTop from "./components/landing/BackToTop";
+
+// Mobile sticky register CTA
+function MobileRegisterCTA() {
+  const navigate = useNavigate();
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto max-w-5xl">
-        <header className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-blue-700">
-            Hack Odyssey
-          </h1>
+    <>
+      <button
+        onClick={() => navigate("/register")}
+        style={{
+          position: "fixed",
+          bottom: "1.25rem",
+          left: "1rem",
+          right: "1rem",
+          zIndex: 900,
+          display: "none",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "var(--color-accent)",
+          color: "#ffffff",
+          fontFamily: "Poppins, sans-serif",
+          fontWeight: 700,
+          fontSize: "1rem",
+          padding: "0.9375rem",
+          borderRadius: "var(--radius-lg)",
+          border: "none",
+          cursor: "pointer",
+          boxShadow: "0 4px 20px rgba(245,158,11,0.4)",
+        }}
+        className="mobile-cta-btn"
+      >
+        Register Now — ₹300 / Member
+      </button>
+      <style>{`
+        @media (max-width: 768px) {
+          .mobile-cta-btn { display: flex !important; }
+        }
+      `}</style>
+    </>
+  );
+}
 
-          <p className="mt-3 text-xl font-medium text-slate-700">
-            Hackathon Registration Portal
-          </p>
+function LandingPage() {
+  const navigate = useNavigate();
 
-          <p className="mt-2 text-slate-500">
-            Register your team with 4 or 5 members.
-          </p>
-        </header>
+  // Override the Register Now scroll to navigate to the register page
+  function handleRegisterClick() {
+    navigate("/register");
+  }
 
-        <RegistrationForm />
-      </div>
-    </main>
+  return (
+    <div style={{ minHeight: "100vh", background: "#050d24", color: "#ffffff" }}>
+      <Navbar onRegisterClick={handleRegisterClick} />
+      <main>
+        <Hero onRegisterClick={handleRegisterClick} />
+        <OpenToAll />
+        <AboutEvent />
+        <CollaboratingClubs />
+        <EventHighlights />
+        <EventDetails />
+        <FAQ />
+        <Contact />
+      </main>
+      <Footer />
+      <BackToTop />
+      <MobileRegisterCTA />
+    </div>
   );
 }
 
@@ -32,10 +93,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<RegistrationPage />} />
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
 
+        {/* Dedicated registration page */}
+        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Admin routes (unchanged) */}
         <Route path="/gfghackadmin" element={<AdminLogin />} />
-
         <Route
           path="/gfghackadmin/dashboard"
           element={
