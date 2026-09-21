@@ -3,50 +3,28 @@ import RegistrationForm from "./components/registration/RegistrationForm";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProtectedRoute from "./pages/admin/AdminProtectedRoute";
-import LandingPage from "./pages/LandingPage";
-import Navbar from "./components/layout/Navbar";
-import Footer from "./components/layout/Footer";
 
 function RegistrationPage() {
   return (
-    <div className="hack-page-shell min-h-screen">
-      <Navbar />
-
-      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-        <header className="mx-auto mb-10 max-w-3xl text-center">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-blue-400">
-            Hack Odyssey 4.0
-          </p>
-
-          <h1 className="hack-gradient-text text-4xl font-black tracking-tight sm:text-5xl">
-            Hackathon Registration
+    <main className="min-h-screen bg-slate-100 px-4 py-10">
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-10 text-center">
+          <h1 className="text-4xl font-bold text-blue-700">
+            Hack Odyssey
           </h1>
 
-          <p className="mt-4 text-base leading-7 text-slate-400 sm:text-lg">
-            Assemble your team, provide accurate details, and secure your
-            participation in Hack Odyssey.
+          <p className="mt-3 text-xl font-medium text-slate-700">
+            Hackathon Registration Portal
           </p>
 
-          <div className="mt-5 flex flex-wrap justify-center gap-3 text-sm text-slate-300">
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-              4 or 5 members
-            </span>
-
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-              Team registration
-            </span>
-
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-              Secure submission
-            </span>
-          </div>
+          <p className="mt-2 text-slate-500">
+            Register your team with 4 or 5 members.
+          </p>
         </header>
 
         <RegistrationForm />
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </main>
   );
 }
 
@@ -54,9 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-
-        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/" element={<RegistrationPage />} />
 
         <Route path="/gfghackadmin" element={<AdminLogin />} />
 

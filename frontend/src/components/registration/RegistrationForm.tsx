@@ -3,10 +3,6 @@ import { useState } from "react";
 import TeamDetailsForm from "./TeamDetailsForm";
 import MemberFields from "./MemberFields";
 
-import GlassCard from "../ui/GlassCard";
-import SectionHeading from "../ui/SectionHeading";
-import Button from "../ui/Button";
-
 import {
   submitRegistration,
   type RegistrationResponse,
@@ -39,7 +35,9 @@ function createMember(role: "LEADER" | "MEMBER"): TeamMember {
 function createInitialMembers(size: number): TeamMember[] {
   return [
     createMember("LEADER"),
-    ...Array.from({ length: size - 1 }, () => createMember("MEMBER")),
+    ...Array.from({ length: size - 1 }, () =>
+      createMember("MEMBER")
+    ),
   ];
 }
 
@@ -160,11 +158,13 @@ function RegistrationForm() {
     setIsSuccess(false);
     setRegistrationResult(null);
 
+    // Team name validation
     if (!formData.teamName.trim()) {
       setMessage("Please enter a team name.");
       return;
     }
 
+    // Team size validation
     if (
       formData.members.length !== 4 &&
       formData.members.length !== 5
@@ -173,11 +173,13 @@ function RegistrationForm() {
       return;
     }
 
+    // Category validation
     if (!formData.category) {
       setMessage("Please select a college type.");
       return;
     }
 
+    // Member validation
     for (let index = 0; index < formData.members.length; index++) {
       const member = formData.members[index];
       const memberNumber = index + 1;
@@ -197,8 +199,9 @@ function RegistrationForm() {
         return;
       }
 
+      // Other college student registration number validation
       if (formData.category === "OTHER") {
-        if (!member.collegeName?.trim()) {
+        if (!member.collegeName.trim()) {
           setMessage(
             `Please enter the college name for Member ${memberNumber}.`
           );
@@ -206,7 +209,7 @@ function RegistrationForm() {
         }
 
         if (
-          !/^EUPH-26-[A-Za-z0-9-]+$/i.test(
+          !/^EUPH-26-[A-Za-z0-9]+$/i.test(
             member.registrationNumber.trim()
           )
         ) {
@@ -217,6 +220,7 @@ function RegistrationForm() {
         }
       }
 
+      // Mobile number validation
       if (!/^\d{10}$/.test(member.mobile.trim())) {
         setMessage(
           `Member ${memberNumber} must have a valid 10-digit phone number.`
@@ -224,6 +228,7 @@ function RegistrationForm() {
         return;
       }
 
+      // KLU-specific validation
       if (formData.category === "KLU") {
         if (!/^\d+$/.test(member.registrationNumber.trim())) {
           setMessage(
@@ -233,7 +238,10 @@ function RegistrationForm() {
         }
 
         if (
-          !member.email.trim().toLowerCase().endsWith("@klu.ac.in")
+          !member.email
+            .trim()
+            .toLowerCase()
+            .endsWith("@klu.ac.in")
         ) {
           setMessage(
             `Member ${memberNumber} must use a valid @klu.ac.in email address.`
@@ -250,10 +258,10 @@ function RegistrationForm() {
 
         if (member.accommodationType === "HOSTELLER") {
           if (
-            !member.hostelName?.trim() ||
-            !member.roomNumber?.trim() ||
-            !member.wardenName?.trim() ||
-            !/^\d{10}$/.test(member.wardenContact?.trim() || "")
+            !member.hostelName.trim() ||
+            !member.roomNumber.trim() ||
+            !member.wardenName.trim() ||
+            !/^\d{10}$/.test(member.wardenContact.trim())
           ) {
             setMessage(
               `Please complete valid hostel details for Member ${memberNumber}.`
@@ -263,13 +271,14 @@ function RegistrationForm() {
         }
       }
 
+      // Other college accommodation validation
       if (formData.category === "OTHER") {
         if (
           member.accommodationType ||
-          member.hostelName?.trim() ||
-          member.roomNumber?.trim() ||
-          member.wardenName?.trim() ||
-          member.wardenContact?.trim()
+          member.hostelName.trim() ||
+          member.roomNumber.trim() ||
+          member.wardenName.trim() ||
+          member.wardenContact.trim()
         ) {
           setMessage(
             `Accommodation details must be empty for Member ${memberNumber} of an Other College.`
@@ -279,6 +288,7 @@ function RegistrationForm() {
       }
     }
 
+    // Duplicate email validation
     const emails = formData.members.map((member) =>
       member.email.trim().toLowerCase()
     );
@@ -288,6 +298,7 @@ function RegistrationForm() {
       return;
     }
 
+    // Duplicate mobile validation
     const mobiles = formData.members.map((member) =>
       member.mobile.trim()
     );
@@ -297,6 +308,7 @@ function RegistrationForm() {
       return;
     }
 
+    // Duplicate registration-number validation
     const registrationNumbers = formData.members.map((member) =>
       member.registrationNumber.trim().toLowerCase()
     );
@@ -354,108 +366,110 @@ function RegistrationForm() {
     }
   }
 
+  // Registration success screen
   if (isSuccess && registrationResult) {
     return (
-      <GlassCard className="mx-auto max-w-3xl p-6 text-center sm:p-10">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-400/10 text-4xl">
-          ✅
-        </div>
+      <section className="rounded-2xl bg-white p-8 text-center shadow-xl">
+        <div className="mb-6 text-6xl">✅</div>
 
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-400">
-          Submission Complete
-        </p>
-
-        <h2 className="mt-3 text-3xl font-black text-white sm:text-4xl">
+        <h2 className="mb-3 text-3xl font-bold text-green-700">
           Registration Successful!
         </h2>
 
-        <p className="mt-4 text-slate-400">
+        <p className="mb-6 text-gray-600">
           {message || "Your team has been registered successfully."}
         </p>
 
-        <div className="mt-8 rounded-2xl border border-emerald-400/20 bg-emerald-400/5 p-5 text-left sm:p-6">
-          <h3 className="mb-5 text-xl font-bold text-white">
+        <div className="mb-6 rounded-xl bg-green-50 p-6 text-left">
+          <h3 className="mb-4 text-xl font-bold text-gray-800">
             Registration Details
           </h3>
 
-          <div className="space-y-4 text-sm">
-            <p className="break-all text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Team ID:
-              </span>{" "}
+          <div className="space-y-3 text-gray-700">
+            <p>
+              <span className="font-semibold">Team ID:</span>{" "}
               {registrationResult.id}
             </p>
 
-            <p className="text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Team Name:
-              </span>{" "}
+            <p>
+              <span className="font-semibold">Team Name:</span>{" "}
               {registrationResult.teamName}
             </p>
 
-            <p className="text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Institution:
-              </span>{" "}
+            <p>
+              <span className="font-semibold">Institution:</span>{" "}
               {registrationResult.institution}
             </p>
 
-            <p className="text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Category:
-              </span>{" "}
+            <p>
+              <span className="font-semibold">Category:</span>{" "}
               {registrationResult.category}
             </p>
 
-            <p className="text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Status:
-              </span>{" "}
+            <p>
+              <span className="font-semibold">Status:</span>{" "}
               {registrationResult.status}
             </p>
 
-            <p className="text-slate-300">
-              <span className="font-semibold text-emerald-300">
-                Team Members:
-              </span>{" "}
+            <p>
+              <span className="font-semibold">Team Members:</span>{" "}
               {registrationResult.members.length}
             </p>
           </div>
         </div>
 
+        {/* WhatsApp Group Button */}
         <a
           href="https://chat.whatsapp.com/D2EVvQ3OThT5nx1wFsznx5"
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-6 block w-full rounded-xl bg-emerald-500 px-6 py-3 text-center font-bold text-slate-950 transition hover:bg-emerald-400"
+          className="block w-full rounded-xl bg-green-600 px-6 py-3 text-center text-lg font-semibold text-white transition hover:bg-green-700"
         >
           Join WhatsApp Group
         </a>
-
-        <p className="mt-5 text-xs leading-6 text-slate-500">
-          Please save your Team ID for future communication.
-        </p>
-      </GlassCard>
+      </section>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Team Details */}
       <TeamDetailsForm
         teamName={formData.teamName}
         category={formData.category}
-        teamSize={teamSize}
         onChange={handleTeamDetailsChange}
-        onTeamSizeChange={handleTeamSizeChange}
       />
 
+      {/* Team Size */}
+      <section className="rounded-2xl bg-white p-6 shadow-md">
+        <label className="mb-2 block text-lg font-semibold text-slate-800">
+          Team Size
+        </label>
+
+        <select
+          value={teamSize}
+          onChange={(event) =>
+            handleTeamSizeChange(
+              Number(event.target.value) as 4 | 5
+            )
+          }
+          className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+        >
+          <option value={4}>4 Members</option>
+          <option value={5}>5 Members</option>
+        </select>
+      </section>
+
+      {/* Team Members */}
       <section className="space-y-5">
-        <div className="mb-6">
-          <SectionHeading
-            eyebrow="Step 02"
-            title="Team Members"
-            description={`Enter the details of all ${teamSize} team members. The first member is the team leader.`}
-          />
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800">
+            Team Members
+          </h2>
+
+          <p className="mt-1 text-slate-600">
+            Enter the details of all {teamSize} team members.
+          </p>
         </div>
 
         {formData.members.map((member, index) => (
@@ -469,40 +483,40 @@ function RegistrationForm() {
         ))}
       </section>
 
+      {/* Error Message */}
       {message && (
-        <div
-          role="alert"
-          className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200"
-        >
+        <div className="rounded-lg bg-red-100 px-4 py-3 font-medium text-red-700">
           {message}
         </div>
       )}
 
-      <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-5">
-        <div className="flex items-start gap-3">
-          <span className="text-xl text-red-300">ⓘ</span>
+      {/* Critical Notice */}
+      <div className="rounded-lg border border-red-500 bg-red-950/90 p-5 text-red-100 shadow-md">
+        <div className="flex items-start gap-4">
+          <div className="mt-1 text-2xl text-red-400">ⓘ</div>
 
           <div>
-            <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-red-300">
-              Critical Notice
+            <h3 className="mb-2 font-mono text-lg font-bold uppercase tracking-wider text-red-400">
+              Critical Notice:
             </h3>
 
-            <p className="mt-2 text-sm leading-6 text-red-100">
+            <p className="font-mono text-sm leading-relaxed text-red-100">
               Ensure all details are accurate before submission. Once
-              registered, details cannot be modified and will be used
-              for <strong>CERTIFICATES &amp; CREDITS.</strong>
+              registered, details cannot be modified and will be used for
+              CERTIFICATES &amp; CREDITS.
             </p>
           </div>
         </div>
       </div>
 
-      <Button
+      {/* Submit Button */}
+      <button
         type="submit"
-        isLoading={isSubmitting}
-        className="w-full py-4 text-base"
+        disabled={isSubmitting}
+        className="w-full rounded-xl bg-blue-600 px-6 py-3 text-lg font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Submit Registration
-      </Button>
+        {isSubmitting ? "Submitting..." : "Submit Registration"}
+      </button>
     </form>
   );
 }
