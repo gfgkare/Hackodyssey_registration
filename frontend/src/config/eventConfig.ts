@@ -66,11 +66,21 @@ export const eventConfig = {
       id: "acm",
       name: "KARE ACM Student Chapter",
       shortName: "ACM",
-      logo: "/acm.jpeg",
+      logo: "/acm.png",
       description:
         "KARE ACM Student Chapter (ID: 170084, SBC344451H) — advancing computing as a science, profession, and public interest.",
       initials: "ACM",
       color: "#0085ca",
+    },
+    {
+      id: "gfg",
+      name: "GFG Campus Body KARE",
+      shortName: "GFG",
+      logo: "/gfg.jpeg",
+      description:
+        "GFG Campus Body KARE — organizing Euphoria 2026, a Techno Management Meet focused on Sustainability.",
+      initials: "KARE",
+      color: "#18b825ff",
     },
     {
       id: "acm-w",
@@ -96,22 +106,12 @@ export const eventConfig = {
       id: "ieee",
       name: "KARE IEEE Education Society",
       shortName: "IEEE",
-      logo: "/ieee.jpeg",
+      logo: "/ieee.png",
       description:
         "KARE IEEE Education Society — bridging technology and innovation through research, education, and events.",
       initials: "IEEE",
       color: "#00629b",
-    },
-    {
-      id: "gfg",
-      name: "GFG Campus Body KARE",
-      shortName: "GFG",
-      logo: "/gfg.jpeg",
-      description:
-        "GFG Campus Body KARE — organizing Euphoria 2026, a Techno Management Meet focused on Sustainability.",
-      initials: "KARE",
-      color: "#18b825ff",
-    },
+    }
   ],
 
   // ── Faculty Coordinators ──────────────────────────────────
