@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import {
   Download,
   FileSpreadsheet,
   LogOut,
+  Mail,
+  Phone,
   RefreshCw,
   Search,
   ShieldCheck,
+  User,
   Users,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -45,7 +49,6 @@ interface Registration {
 
 type ActiveTab = "TEAMS" | "PARTICIPANTS";
 
-
 function formatAcademicYear(year?: string | null): string {
   if (!year) return "-";
 
@@ -61,7 +64,6 @@ function formatAcademicYear(year?: string | null): string {
 
 function formatGender(gender?: string | null): string {
   if (!gender) return "-";
-
   return gender.charAt(0) + gender.slice(1).toLowerCase();
 }
 
@@ -82,7 +84,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadRegistrations = async () => {
+  const fetchRegistrations = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -92,35 +94,80 @@ function AdminDashboard() {
 
       if (Array.isArray(data)) {
         setRegistrations(data);
-      } else if (
-        data &&
-        typeof data === "object" &&
-        "registrations" in data
-      ) {
+      } else if (data && typeof data === "object" && "registrations" in data) {
         setRegistrations(
           (data as { registrations: Registration[] }).registrations,
         );
       } else {
         setRegistrations([]);
       }
-    } catch (requestError: any) {
-      if (requestError?.response?.status === 401) {
-        navigate("/gfghackadmin");
-        return;
-      }
+    } catch (requestError: unknown) {
+      if (axios.isAxiosError(requestError)) {
+        if (requestError.response?.status === 401) {
+          navigate("/gfghackadmin");
+          return;
+        }
 
-      setError(
-        requestError?.response?.data?.message ||
-          "Unable to load registrations.",
-      );
+        setError(
+          (requestError.response?.data as { message?: string })?.message ||
+            "Unable to load registrations.",
+        );
+      } else {
+        setError("Unable to load registrations.");
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
-    loadRegistrations();
-  }, []);
+    let isMounted = true;
+
+    const initializeData = async () => {
+      try {
+        setError("");
+        const response = await getAdminRegistrations();
+        if (!isMounted) return;
+
+        const data = response.data;
+        if (Array.isArray(data)) {
+          setRegistrations(data);
+        } else if (data && typeof data === "object" && "registrations" in data) {
+          setRegistrations(
+            (data as { registrations: Registration[] }).registrations,
+          );
+        } else {
+          setRegistrations([]);
+        }
+      } catch (requestError: unknown) {
+        if (!isMounted) return;
+
+        if (axios.isAxiosError(requestError)) {
+          if (requestError.response?.status === 401) {
+            navigate("/gfghackadmin");
+            return;
+          }
+
+          setError(
+            (requestError.response?.data as { message?: string })?.message ||
+              "Unable to load registrations.",
+          );
+        } else {
+          setError("Unable to load registrations.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void initializeData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
@@ -134,7 +181,7 @@ function AdminDashboard() {
     const search = searchTerm.trim().toLowerCase();
 
     return registrations.filter((registration) => {
-        return (
+      return (
         !search ||
         registration.teamName.toLowerCase().includes(search) ||
         registration.id.toLowerCase().includes(search) ||
@@ -143,11 +190,11 @@ function AdminDashboard() {
             member.fullName.toLowerCase().includes(search) ||
             member.registrationNumber.toLowerCase().includes(search),
         )
-        );
+      );
     });
-    }, [registrations, searchTerm]);
+  }, [registrations, searchTerm]);
 
-    const participants = useMemo(() => {
+  const participants = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
 
     const allParticipants = registrations.flatMap((registration) =>
@@ -185,66 +232,76 @@ function AdminDashboard() {
     });
   }, [registrations, searchTerm, genderFilter, accommodationFilter]);
 
-    const downloadExport = async (
-        fileName:
-            | "registrations.csv"
-            | "registrations.xlsx"
-            | "teams.csv"
-            | "teams.xlsx",
-    ) => {
-        try {
-            setError("");
+  const downloadExport = async (
+    fileName:
+      | "registrations.csv"
+      | "registrations.xlsx"
+      | "teams.csv"
+      | "teams.xlsx",
+  ) => {
+    try {
+      setError("");
 
-            const blob = await downloadAdminExport(fileName);
+      const blob = await downloadAdminExport(fileName);
 
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
 
-            link.href = downloadUrl;
-            link.download = fileName;
+      link.href = downloadUrl;
+      link.download = fileName;
 
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (requestError: any) {
-            if (requestError?.response?.status === 401) {
-            navigate("/gfghackadmin");
-            return;
-            }
-
-            setError(
-            requestError?.response?.data?.message ||
-                "Unable to export registrations.",
-            );
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (requestError: unknown) {
+      if (axios.isAxiosError(requestError)) {
+        if (requestError.response?.status === 401) {
+          navigate("/gfghackadmin");
+          return;
         }
-    };
+
+        setError(
+          (requestError.response?.data as { message?: string })?.message ||
+            "Unable to export registrations.",
+        );
+      } else {
+        setError("Unable to export registrations.");
+      }
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-black px-4 py-6 text-white md:px-10">
-      <header className="mb-10 rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-3 bg-yellow-500" />
+    <main className="min-h-screen bg-black px-3 py-5 text-white md:px-8 md:py-7">
+      {/* Top Header Control Center */}
+      <header className="mb-6 rounded-2xl border border-zinc-800/80 bg-[#0c0c0e] p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)] md:p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+          {/* Logo & Counter */}
+          <div className="flex items-center gap-3.5">
+            <div className="h-9 w-2.5 rounded-sm bg-yellow-500 shadow-[0_0_12px_rgba(234,179,8,0.6)]" />
 
             <div>
-              <h1 className="font-mono text-3xl font-black tracking-wider">
+              <h1 className="font-mono text-2xl font-black tracking-wider text-white md:text-3xl">
                 MISSION CONTROL
               </h1>
 
-              <p className="mt-2 font-mono text-xs uppercase tracking-[0.2em] text-yellow-500">
+              <p className="mt-1 font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-yellow-500/90 md:text-xs">
                 ADMIN DASHBOARD • {registrations.length} TEAMS REGISTERED
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex rounded-xl border border-zinc-800 bg-black p-1">
+          {/* Controls: Tabs, Filters, Search, Exports, Logout */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* View Switcher Tabs */}
+            <div className="flex rounded-xl border border-zinc-800 bg-black/70 p-1">
               <button
+                type="button"
                 onClick={() => setActiveTab("TEAMS")}
-                className={`rounded-lg px-5 py-3 text-sm font-bold transition ${
+                className={`rounded-lg px-4 py-2 text-xs font-black tracking-wider transition-all duration-200 md:text-sm ${
                   activeTab === "TEAMS"
-                    ? "bg-yellow-500 text-black"
+                    ? "bg-yellow-500 text-black shadow-[0_0_14px_rgba(234,179,8,0.45)]"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -252,10 +309,11 @@ function AdminDashboard() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setActiveTab("PARTICIPANTS")}
-                className={`rounded-lg px-5 py-3 text-sm font-bold transition ${
+                className={`rounded-lg px-4 py-2 text-xs font-black tracking-wider transition-all duration-200 md:text-sm ${
                   activeTab === "PARTICIPANTS"
-                    ? "bg-yellow-500 text-black"
+                    ? "bg-yellow-500 text-black shadow-[0_0_14px_rgba(234,179,8,0.45)]"
                     : "text-zinc-400 hover:text-white"
                 }`}
               >
@@ -263,323 +321,379 @@ function AdminDashboard() {
               </button>
             </div>
 
+            {/* Filter Dropdowns for Participants */}
+            {activeTab === "PARTICIPANTS" && (
+              <>
+                <select
+                  value={genderFilter}
+                  onChange={(event) => setGenderFilter(event.target.value)}
+                  aria-label="Filter by gender"
+                  className="rounded-xl border border-zinc-800 bg-black/90 px-3 py-2 text-xs font-medium text-zinc-300 outline-none transition focus:border-yellow-500 md:text-sm"
+                >
+                  <option value="ALL">All Genders</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                </select>
+
+                <select
+                  value={accommodationFilter}
+                  onChange={(event) =>
+                    setAccommodationFilter(event.target.value)
+                  }
+                  aria-label="Filter by accommodation"
+                  className="rounded-xl border border-zinc-800 bg-black/90 px-3 py-2 text-xs font-medium text-zinc-300 outline-none transition focus:border-yellow-500 md:text-sm"
+                >
+                  <option value="ALL">All Accommodation</option>
+                  <option value="HOSTELLER">Hostler</option>
+                  <option value="DAY_SCHOLAR">Dayscholar</option>
+                </select>
+              </>
+            )}
+
+            {/* Search Input */}
+            <div className="relative min-w-[200px] flex-1 md:min-w-[240px] xl:w-64">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={
+                  activeTab === "TEAMS"
+                    ? "Search Teams / ID..."
+                    : "Search Name / RegNo..."
+                }
+                className="w-full rounded-xl border border-zinc-800 bg-black/90 py-2 pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-500 transition focus:border-yellow-500 md:text-sm"
+              />
+            </div>
+
+            {/* Refresh Button */}
             <button
+              type="button"
+              onClick={fetchRegistrations}
+              className="rounded-xl border border-zinc-800 bg-zinc-900/80 p-2.5 text-zinc-400 transition hover:border-zinc-700 hover:text-white active:scale-95"
+              title="Refresh registrations"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${loading ? "animate-spin text-yellow-500" : ""}`}
+              />
+            </button>
+
+            {/* Export XLS */}
+            <button
+              type="button"
+              onClick={() =>
+                downloadExport(
+                  activeTab === "TEAMS" ? "teams.xlsx" : "registrations.xlsx",
+                )
+              }
+              className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-[0_0_12px_rgba(5,150,105,0.3)] transition hover:bg-emerald-500 active:scale-95 md:text-sm"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              EXPORT XLS
+            </button>
+
+            {/* Export CSV */}
+            <button
+              type="button"
+              onClick={() =>
+                downloadExport(
+                  activeTab === "TEAMS" ? "teams.csv" : "registrations.csv",
+                )
+              }
+              className="flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-bold text-white shadow-[0_0_12px_rgba(2,132,199,0.3)] transition hover:bg-sky-500 active:scale-95 md:text-sm"
+            >
+              <Download className="h-4 w-4" />
+              EXPORT CSV
+            </button>
+
+            {/* Logout Button */}
+            <button
+              type="button"
               onClick={handleLogout}
-              className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm font-bold text-zinc-200 hover:bg-zinc-800"
+              className="flex items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-xs font-bold text-zinc-400 transition hover:border-red-900/60 hover:bg-red-950/30 hover:text-red-300 md:text-sm"
+              title="Logout from admin session"
             >
               <LogOut className="h-4 w-4" />
               LOGOUT
             </button>
           </div>
         </div>
-
-        <div className="mt-6 flex flex-col gap-3 xl:flex-row xl:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-500" />
-
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder={
-                activeTab === "TEAMS"
-                  ? "Search teams or registration ID..."
-                  : "Search name or registration number..."
-              }
-              className="w-full rounded-xl border border-zinc-800 bg-black py-3 pl-12 pr-4 text-white outline-none placeholder:text-zinc-500 focus:border-yellow-500"
-            />
-          </div>
-
-          {activeTab === "PARTICIPANTS" && (
-            <>
-              <select
-                value={genderFilter}
-                onChange={(event) => setGenderFilter(event.target.value)}
-                className="rounded-xl border border-zinc-800 bg-black px-4 py-3 text-zinc-300 outline-none focus:border-yellow-500"
-              >
-                <option value="ALL">All Genders</option>
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-              </select>
-
-              <select
-                value={accommodationFilter}
-                onChange={(event) =>
-                  setAccommodationFilter(event.target.value)
-                }
-                className="rounded-xl border border-zinc-800 bg-black px-4 py-3 text-zinc-300 outline-none focus:border-yellow-500"
-              >
-                <option value="ALL">All Accommodation</option>
-                <option value="HOSTELLER">Hosteller</option>
-                <option value="DAY_SCHOLAR">Dayscholar</option>
-              </select>
-            </>
-          )}
-
-          <button
-            onClick={loadRegistrations}
-            className="rounded-xl border border-zinc-700 bg-zinc-900 p-3 text-zinc-300 hover:bg-zinc-800"
-            title="Refresh"
-          >
-            <RefreshCw className="h-5 w-5" />
-          </button>
-
-          <button
-            onClick={() =>
-                downloadExport(
-                    activeTab === "TEAMS" ? "teams.xlsx" : "registrations.xlsx"
-                )
-            }
-            className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white hover:bg-emerald-500"
-          >
-            <FileSpreadsheet className="h-5 w-5" />
-            EXPORT XLSX
-          </button>
-
-          <button
-            onClick={() =>
-                downloadExport(
-                    activeTab === "TEAMS" ? "teams.csv" : "registrations.csv"
-                )
-            }
-            className="flex items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 font-bold text-white hover:bg-sky-500"
-          >
-            <Download className="h-5 w-5" />
-            EXPORT CSV
-          </button>
-        </div>
       </header>
 
+      {/* Error Banner */}
       {error && (
-        <div className="mb-6 rounded-xl border border-red-800 bg-red-950 p-4 text-red-300">
+        <div className="mb-6 rounded-xl border border-red-900/60 bg-red-950/50 p-4 text-sm font-medium text-red-300">
           {error}
         </div>
       )}
 
+      {/* Content Section */}
       {loading ? (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-10 text-center text-zinc-400">
-          Loading registrations...
+        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-zinc-800/80 bg-[#0c0c0e] p-12 text-zinc-400">
+          <RefreshCw className="mb-3 h-8 w-8 animate-spin text-yellow-500" />
+          <p className="font-mono text-sm tracking-wider">
+            SYNCHRONIZING WITH MISSION CONTROL...
+          </p>
         </div>
       ) : activeTab === "TEAMS" ? (
-        <section className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950">
-          <div className="border-b border-zinc-800 px-6 py-5">
-            <h2 className="font-mono text-xl font-bold tracking-wide">
-              TEAM REGISTRATIONS
-            </h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              Showing {filteredRegistrations.length} teams
-            </p>
+        /* TEAMS TABLE */
+        <section className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#0c0c0e] shadow-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] border-collapse text-left text-xs md:text-sm">
+              <thead className="border-b border-zinc-800 bg-black text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                <tr>
+                  <th className="w-12 px-5 py-4 text-center">#</th>
+                  <th className="px-5 py-4">TEAM NAME</th>
+                  <th className="px-5 py-4">CONTACT INTEL</th>
+                  <th className="px-5 py-4 text-center">UNIT SIZE</th>
+                  <th className="px-5 py-4">CATEGORY</th>
+                  <th className="px-5 py-4">STATUS</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-zinc-900/80 font-sans">
+                {filteredRegistrations.map((registration, index) => {
+                  const leader =
+                    registration.members.find(
+                      (member) => member.role === "LEADER",
+                    ) || registration.members[0];
+
+                  return (
+                    <tr
+                      key={registration.id}
+                      className="transition-colors hover:bg-zinc-900/40"
+                    >
+                      {/* Index */}
+                      <td className="px-5 py-5 text-center font-mono text-zinc-500">
+                        {index + 1}
+                      </td>
+
+                      {/* Team Name & ID */}
+                      <td className="px-5 py-5">
+                        <p className="font-mono text-base font-bold tracking-wide text-white">
+                          {registration.teamName}
+                        </p>
+                        <p className="mt-1 font-mono text-[11px] font-medium text-yellow-500/90">
+                          ID: {registration.id}
+                        </p>
+                      </td>
+
+                      {/* Contact Intel */}
+                      <td className="px-5 py-5">
+                        <div className="flex items-center gap-2 font-medium text-zinc-100">
+                          <User className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                          <span>{leader?.fullName || "-"}</span>
+                          {leader?.registrationNumber && (
+                            <span className="font-mono text-xs text-zinc-400">
+                              ({leader.registrationNumber})
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
+                          <Mail className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                          <a
+                            href={`mailto:${leader?.email}`}
+                            className="transition hover:text-yellow-400 hover:underline"
+                          >
+                            {leader?.email || "-"}
+                          </a>
+                        </div>
+
+                        <div className="mt-1 flex items-center gap-2 text-xs text-zinc-400">
+                          <Phone className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
+                          <a
+                            href={`tel:${leader?.mobile}`}
+                            className="font-mono transition hover:text-yellow-400 hover:underline"
+                          >
+                            {leader?.mobile || "-"}
+                          </a>
+                        </div>
+                      </td>
+
+                      {/* Unit Size */}
+                      <td className="px-5 py-5 text-center">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700/60 bg-zinc-800/90 font-mono text-xs font-bold text-zinc-100">
+                          {registration.members.length}
+                        </span>
+                      </td>
+
+                      {/* Category */}
+                      <td className="px-5 py-5">
+                        <span className="inline-block rounded border border-zinc-800 bg-zinc-900 px-2.5 py-1 font-mono text-xs font-semibold text-zinc-300">
+                          {registration.category}
+                        </span>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-5 py-5">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-800/60 bg-emerald-950/80 px-3 py-1 font-mono text-[11px] font-bold tracking-wider text-emerald-400">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                          CONFIRMED
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-
-          <table className="min-w-[1000px] w-full text-left">
-            <thead className="border-b border-zinc-800 bg-black text-xs uppercase text-zinc-400">
-              <tr>
-                <th className="px-6 py-5">#</th>
-                <th className="px-6 py-5">Team Name</th>
-                <th className="px-6 py-5">Contact Intel</th>
-                <th className="px-6 py-5">Unit Size</th>
-                <th className="px-6 py-5">Category</th>
-                <th className="px-6 py-5">Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredRegistrations.map((registration, index) => {
-                const leader =
-                  registration.members.find(
-                    (member) => member.role === "LEADER",
-                  ) || registration.members[0];
-
-                return (
-                  <tr
-                    key={registration.id}
-                    className="border-b border-zinc-900 hover:bg-zinc-900"
-                  >
-                    <td className="px-6 py-6 text-zinc-500">
-                      {index + 1}
-                    </td>
-
-                    <td className="px-6 py-6">
-                      <p className="font-mono text-lg font-bold">
-                        {registration.teamName}
-                      </p>
-                      <p className="mt-2 text-xs text-yellow-500">
-                        ID: {registration.id}
-                      </p>
-                    </td>
-
-                    <td className="px-6 py-6">
-                      <p className="font-semibold text-zinc-200">
-                        {leader?.fullName || "-"}
-                      </p>
-                      <p className="mt-2 text-sm text-zinc-400">
-                        {leader?.email || "-"}
-                      </p>
-                      <p className="mt-2 text-sm text-zinc-400">
-                        {leader?.mobile || "-"}
-                      </p>
-                    </td>
-
-                    <td className="px-6 py-6">
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 font-bold">
-                        {registration.members.length}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-6 text-zinc-300">
-                      {registration.category}
-                    </td>
-
-                    <td className="px-6 py-6">
-                      <span className="rounded-full bg-emerald-950 px-3 py-2 text-xs font-bold text-emerald-400">
-                        CONFIRMED
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </section>
       ) : (
-        <section className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950">
-          <div className="border-b border-zinc-800 px-6 py-5">
-            <h2 className="font-mono text-xl font-bold tracking-wide">
-              PARTICIPANT DATABASE
-            </h2>
-            <p className="mt-1 text-sm text-zinc-500">
-              Showing {participants.length} participants
-            </p>
-          </div>
+        /* PARTICIPANTS TABLE */
+        <section className="overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#0c0c0e] shadow-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1500px] border-collapse text-left text-xs md:text-sm">
+              <thead className="border-b border-zinc-800 bg-black text-[11px] font-mono uppercase tracking-wider text-zinc-400">
+                <tr>
+                  <th className="w-12 px-4 py-4 text-center">#</th>
+                  <th className="px-4 py-4">TEAM NAME</th>
+                  <th className="px-4 py-4">NAME</th>
+                  <th className="px-4 py-4">REG NO</th>
+                  <th className="px-4 py-4">GENDER</th>
+                  <th className="px-4 py-4">YEAR/BRANCH</th>
+                  <th className="px-4 py-4">PHONE</th>
+                  <th className="px-4 py-4">EMAIL</th>
+                  <th className="px-4 py-4">COLLEGE</th>
+                  <th className="px-4 py-4">ACCOMMODATION</th>
+                  <th className="px-4 py-4">HOSTEL DETAILS</th>
+                </tr>
+              </thead>
 
-          <table className="min-w-[1700px] w-full text-left">
-            <thead className="border-b border-zinc-800 bg-black text-xs uppercase text-zinc-400">
-              <tr>
-                <th className="px-5 py-5">#</th>
-                <th className="px-5 py-5">Team Name</th>
-                <th className="px-5 py-5">Name</th>
-                <th className="px-5 py-5">Reg No</th>
-                <th className="px-5 py-5">Gender</th>
-                <th className="px-5 py-5">Year / Branch</th>
-                <th className="px-5 py-5">Phone</th>
-                <th className="px-5 py-5">Email</th>
-                <th className="px-5 py-5">College</th>
-                <th className="px-5 py-5">Accommodation</th>
-                <th className="px-5 py-5">Hostel Details</th>
-              </tr>
-            </thead>
+              <tbody className="divide-y divide-zinc-900/80 font-sans">
+                {participants.map((participant, index) => {
+                  const isHosteller =
+                    participant.accommodationType === "HOSTELLER";
 
-            <tbody>
-              {participants.map((participant, index) => {
-                const isHosteller =
-                  participant.accommodationType === "HOSTELLER";
+                  return (
+                    <tr
+                      key={`${participant.teamId}-${participant.registrationNumber}-${index}`}
+                      className="transition-colors hover:bg-zinc-900/40"
+                    >
+                      {/* Index */}
+                      <td className="px-4 py-5 text-center font-mono text-zinc-500">
+                        {index + 1}
+                      </td>
 
-                return (
-                  <tr
-                    key={`${participant.teamName}-${participant.registrationNumber}-${index}`}
-                    className="border-b border-zinc-900 hover:bg-zinc-900"
-                  >
-                    <td className="px-5 py-6 text-zinc-500">
-                      {index + 1}
-                    </td>
+                      {/* Team Name */}
+                      <td className="px-4 py-5 font-mono text-xs font-bold uppercase tracking-wide text-white">
+                        {participant.teamName}
+                      </td>
 
-                    <td className="px-5 py-6 font-semibold text-zinc-200">
-                      {participant.teamName}
-                    </td>
+                      {/* Participant Full Name */}
+                      <td className="px-4 py-5 font-semibold text-zinc-100">
+                        {participant.fullName}
+                      </td>
 
-                    <td className="px-5 py-6 font-semibold text-zinc-100">
-                      {participant.fullName}
-                    </td>
+                      {/* Registration Number */}
+                      <td className="px-4 py-5 font-mono text-zinc-400">
+                        {participant.registrationNumber}
+                      </td>
 
-                    <td className="px-5 py-6 text-zinc-400">
-                      {participant.registrationNumber}
-                    </td>
+                      {/* Gender */}
+                      <td className="px-4 py-5 text-zinc-200">
+                        {formatGender(participant.gender)}
+                      </td>
 
-                    <td className="px-5 py-6 text-zinc-300">
-                      {formatGender(participant.gender)}
-                    </td>
+                      {/* Year / Branch */}
+                      <td className="whitespace-nowrap px-4 py-5 text-zinc-200">
+                        {formatAcademicYear(participant.academicYear)} /{" "}
+                        <span className="capitalize">
+                          {participant.department || "-"}
+                        </span>
+                      </td>
 
-                    <td className="px-5 py-6 whitespace-nowrap text-zinc-300">
-                      {formatAcademicYear(participant.academicYear)} /{" "}
-                      {participant.department || "-"}
-                    </td>
+                      {/* Phone */}
+                      <td className="px-4 py-5 font-mono text-zinc-400">
+                        {participant.mobile}
+                      </td>
 
-                    <td className="px-5 py-6 text-zinc-400">
-                      {participant.mobile}
-                    </td>
+                      {/* Email */}
+                      <td className="px-4 py-5 text-zinc-400">
+                        {participant.email}
+                      </td>
 
-                    <td className="px-5 py-6 text-zinc-400">
-                      {participant.email}
-                    </td>
+                      {/* College */}
+                      <td className="px-4 py-5 text-zinc-400">
+                        {participant.collegeName || "-"}
+                      </td>
 
-                    <td className="px-5 py-6 text-zinc-400">
-                      {participant.collegeName || "-"}
-                    </td>
-
-                    <td className="px-5 py-6">
-                      <span
-                        className={`rounded-md px-3 py-2 text-xs font-bold ${
-                          participant.accommodationType === "HOSTELLER"
-                            ? "bg-indigo-950 text-indigo-300"
-                            : "bg-zinc-800 text-zinc-300"
-                        }`}
-                      >
-                        {formatAccommodation(
-                          participant.accommodationType,
+                      {/* Accommodation Badge */}
+                      <td className="px-4 py-5">
+                        {participant.accommodationType === "HOSTELLER" ? (
+                          <span className="inline-block rounded border border-[#272b52] bg-[#14162e] px-2.5 py-1 font-mono text-[11px] font-bold uppercase text-[#93c5fd]">
+                            {formatAccommodation(
+                              participant.accommodationType,
+                            )}
+                          </span>
+                        ) : participant.accommodationType === "DAY_SCHOLAR" ? (
+                          <span className="inline-block rounded border border-zinc-800 bg-[#1e2026] px-2.5 py-1 font-mono text-[11px] font-bold uppercase text-zinc-400">
+                            {formatAccommodation(
+                              participant.accommodationType,
+                            )}
+                          </span>
+                        ) : (
+                          <span className="font-mono text-zinc-600">-</span>
                         )}
-                      </span>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-6 text-sm text-zinc-400">
-                      {isHosteller ? (
-                        <div className="space-y-1 whitespace-nowrap">
-                          <p>
-                            <span className="text-zinc-600">
-                              HOSTEL:
-                            </span>{" "}
-                            {participant.hostelName || "-"}
-                          </p>
-                          <p>
-                            <span className="text-zinc-600">
-                              ROOM:
-                            </span>{" "}
-                            {participant.roomNumber || "-"}
-                          </p>
-                          <p>
-                            <span className="text-zinc-600">
-                              WARDEN:
-                            </span>{" "}
-                            {participant.wardenName || "-"}
-                          </p>
-                          <p className="text-xs">
-                            {participant.wardenContact || "-"}
-                          </p>
-                        </div>
-                      ) : (
-                        <span className="text-zinc-600">-</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {/* Hostel Details */}
+                      <td className="whitespace-nowrap px-4 py-5 text-xs text-zinc-300">
+                        {isHosteller ? (
+                          <div className="space-y-0.5 font-mono">
+                            <p>
+                              <span className="font-semibold text-zinc-500">
+                                HOSTEL:
+                              </span>{" "}
+                              {participant.hostelName || "-"}
+                              {participant.roomNumber
+                                ? ` (${participant.roomNumber})`
+                                : ""}
+                            </p>
+                            <p>
+                              <span className="font-semibold text-zinc-500">
+                                WARDEN:
+                              </span>{" "}
+                              {participant.wardenName || "-"}
+                            </p>
+                            <p className="text-[11px] text-zinc-400">
+                              {participant.wardenContact || "-"}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="font-mono text-zinc-600">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </section>
       )}
 
+      {/* Empty State */}
       {!loading &&
         ((activeTab === "TEAMS" && filteredRegistrations.length === 0) ||
-            (activeTab === "PARTICIPANTS" && participants.length === 0)) && (
-          <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950 p-8 text-center text-zinc-500">
-            No matching records found.
+          (activeTab === "PARTICIPANTS" && participants.length === 0)) && (
+          <div className="mt-6 rounded-2xl border border-zinc-800/80 bg-[#0c0c0e] p-12 text-center text-zinc-500">
+            <p className="font-mono text-sm">NO MATCHING RECORDS LOCATED.</p>
           </div>
         )}
 
-      <footer className="mt-8 flex items-center justify-center gap-2 text-xs text-zinc-600">
-        <ShieldCheck className="h-4 w-4" />
-        <span>SECURED ADMIN ENVIRONMENT</span>
-        <Users className="ml-3 h-4 w-4" />
-        <span>{participants.length} PARTICIPANTS</span>
+      {/* Footer */}
+      <footer className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-zinc-500">
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck className="h-4 w-4 text-yellow-500/80" />
+          <span>SECURED ADMIN ENVIRONMENT</span>
+        </div>
+        <span className="text-zinc-700">•</span>
+        <div className="flex items-center gap-1.5">
+          <Users className="h-4 w-4 text-zinc-400" />
+          <span>{participants.length} PARTICIPANTS</span>
+        </div>
       </footer>
     </main>
   );

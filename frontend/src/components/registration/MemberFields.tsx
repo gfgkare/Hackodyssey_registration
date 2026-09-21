@@ -340,15 +340,16 @@ export default function MemberFields({
                 </select>
               </FormField>
 
-              {/* Hosteller Sub-fields with warm tint */}
+              {/* Hosteller Sub-fields with theme match */}
               {isHosteller && (
                 <div
                   style={{
                     marginTop: "1.125rem",
                     padding: "1.25rem",
-                    background: "#dbe8fa",
+                    background: "rgba(6, 16, 42, 0.65)",
                     borderRadius: "var(--radius-lg)",
-                    border: "1px solid #bfd3f2",
+                    border: "1px solid rgba(147, 197, 253, 0.2)",
+                    boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.25)",
                   }}
                 >
                   <p
@@ -358,10 +359,23 @@ export default function MemberFields({
                       fontWeight: 700,
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
-                      color: "var(--color-primary)",
+                      color: "rgba(147, 197, 253, 0.9)",
                       marginBottom: "1rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
                     }}
                   >
+                    <span
+                      style={{
+                        height: 12,
+                        width: 3,
+                        borderRadius: 999,
+                        background: "var(--color-accent)",
+                        boxShadow: "0 0 6px var(--color-accent)",
+                        display: "inline-block",
+                      }}
+                    />
                     KLU Hostel Residency Details
                   </p>
                   <div className="fields-2col" style={{ rowGap: "1rem" }}>
