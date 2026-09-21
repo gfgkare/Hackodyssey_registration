@@ -12,9 +12,19 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+const defaultOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:4173",
+  "https://hackodyssey4.vercel.app",
+];
+
+const envOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
-  .map((url) => url.trim().replace(/\/$/, ""));
+  .map((url) => url.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
 
 app.use(
   cors({
@@ -24,11 +34,19 @@ app.use(
         return callback(null, true);
       }
 
-      // Check configured origins or any local development origin (localhost / 127.0.0.1 on any port)
-      const isConfigured = allowedOrigins.includes(origin);
-      const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      const normalizedOrigin = origin.trim().replace(/\/+$/, "");
 
-      if (isConfigured || isLocalhost) {
+      // Check configured origins or any local development origin (localhost / 127.0.0.1 on any port)
+      const isConfigured =
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes(normalizedOrigin);
+      const isLocalhost =
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      const isVercelDomain =
+        /^https:\/\/hackodyssey4.*\.vercel\.app$/.test(normalizedOrigin) ||
+        /^https:\/\/.*hackodyssey.*\.vercel\.app$/.test(normalizedOrigin);
+
+      if (isConfigured || isLocalhost || isVercelDomain) {
         return callback(null, true);
       }
 

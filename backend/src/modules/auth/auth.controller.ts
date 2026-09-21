@@ -103,10 +103,12 @@ export async function loginAdmin(
      "Admin logged in successfully"
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("admin_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 2 * 60 * 60 * 1000,
     });
 
@@ -141,10 +143,12 @@ export async function logoutAdmin(
       );
     }
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.clearCookie("admin_token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     });
 
     res.status(200).json({
