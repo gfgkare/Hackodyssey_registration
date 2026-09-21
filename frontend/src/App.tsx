@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
-// Admin pages (unchanged)
+// Admin pages
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProtectedRoute from "./pages/admin/AdminProtectedRoute";
 
-// Dedicated register page
+// Dedicated registration page
 import RegisterPage from "./pages/RegisterPage";
 
 // Landing page sections
@@ -21,32 +21,24 @@ import Contact from "./components/landing/Contact";
 import Footer from "./components/landing/Footer";
 import BackToTop from "./components/landing/BackToTop";
 
-// Mobile sticky register CTA
-function MobileRegisterCTA() {
-  const navigate = useNavigate();
-  return (
-    <>
-      
-      <style>{`
-        @media (max-width: 768px) {
-          .mobile-cta-btn { display: flex !important; }
-        }
-      `}</style>
-    </>
-  );
-}
-
+// Landing page
 function LandingPage() {
   const navigate = useNavigate();
 
-  // Override the Register Now scroll to navigate to the register page
   function handleRegisterClick() {
     navigate("/register");
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050d24", color: "#ffffff" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#050d24",
+        color: "#ffffff",
+      }}
+    >
       <Navbar onRegisterClick={handleRegisterClick} />
+
       <main>
         <Hero onRegisterClick={handleRegisterClick} />
         <OpenToAll />
@@ -57,13 +49,14 @@ function LandingPage() {
         <FAQ />
         <Contact />
       </main>
+
       <Footer />
       <BackToTop />
-      <MobileRegisterCTA />
     </div>
   );
 }
 
+// Application routes
 function App() {
   return (
     <BrowserRouter>
@@ -74,8 +67,10 @@ function App() {
         {/* Dedicated registration page */}
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* Admin routes (unchanged) */}
+        {/* Admin login */}
         <Route path="/gfghackadmin" element={<AdminLogin />} />
+
+        {/* Protected admin dashboard */}
         <Route
           path="/gfghackadmin/dashboard"
           element={
