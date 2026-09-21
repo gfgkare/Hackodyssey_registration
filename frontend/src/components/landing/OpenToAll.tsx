@@ -27,7 +27,7 @@ const features = [
     icon: <GraduationCap size={22} />,
     title: "Premier University Experience",
     description:
-      "24 hours of non-stop hacking at Dr. K.S. Krishnan Auditorium, Kalasalingam University.",
+      "24 hours of non-stop hacking at Central Library, Kalasalingam University.",
     badgeColor: "#16a34a",
   },
 ];

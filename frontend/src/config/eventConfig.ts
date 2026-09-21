@@ -20,7 +20,7 @@ export const eventConfig = {
   registrationDeadlineISO: "2026-09-20T23:59:59+05:30",
 
   // ── Venue ─────────────────────────────────────────────────
-  venue: "Dr. K.S. Krishnan Auditorium, KARE",
+  venue: "Central Library, KARE",
   venueDetail: "Kalasalingam Academy of Research and Education, Krishnankoil, Tamil Nadu",
 
   // ── Eligibility & Fees ───────────────────────────────────
@@ -35,23 +35,23 @@ export const eventConfig = {
   sponsor: "CodeChef",
 
   // ── Contact ──────────────────────────────────────────────
-  contactEmail: "hackodyssey@kare.ac.in",
-  contactPhone: "+91 78933 40788",
+  contactEmail: "gfgkarestudentchapter@klu.ac.in",
+  contactPhone: "+91 91005 50609",
   address: "Kalasalingam Academy of Research and Education, Krishnankoil, Tamil Nadu",
 
   // ── Student Coordinators ──────────────────────────────────
   studentCoordinators: [
     { name: "Shaik Thaha", phone: "78933 40788" },
-    { name: "C Yasasvi Reddy", phone: "9390198225" },
-    { name: "P Harshika Suryanjali", phone: "95027 95304" },
-    { name: "Meesala Jahnavi Sree", phone: "8074643008" },
+    { name: "L Harsha Vardhan", phone: "91005 50609" },
+    { name: "C Yasasvi Reddy", phone: "93901 98225" },
+    { name: "Meesala Jahnavi Sree", phone: "80746 43008" },
   ],
 
   // ── Social Links ─────────────────────────────────────────
   social: {
-    instagram: "https://instagram.com/hackodyssey_kare",
-    linkedin: "https://linkedin.com/company/hackodyssey-kare",
-    website: "https://klu.ac.in",
+    instagram: "https://www.instagram.com/gfg_campus_body_kare/",
+    linkedin: "https://www.linkedin.com/company/gfg-kare-student-chapter",
+    website: "https://euphoria.kalasalingam.ac.in/",
   },
 
   // ── WhatsApp (post-registration) ─────────────────────────
@@ -120,13 +120,13 @@ export const eventConfig = {
       name: "Dr. P. Chinnasamy",
       role: "ACM/IEE EDU SBC Counsellor, KARE (ASP/CSE)",
       phone: "96002 81664",
-      email: "hackodyssey@kare.ac.in",
+      email: "p.chinnasamy@klu.ac.in",
     },
     {
       name: "Dr. R. Raja Sekar",
-      role: "Faculty Coordinator, AP/CSE",
-      phone: "63821 72610",
-      email: "hackodyssey@kare.ac.in",
+      role: "Faculty Coordinator, ASP/CSE",
+      phone: "83442 04371",
+      email: "r.rajasekar@klu.ac.in",
     },
   ],
 
@@ -190,7 +190,7 @@ export const eventConfig = {
     {
       question: "Where will the event take place?",
       answer:
-        "Hack Odyssey 4.0 will be held at Dr. K.S. Krishnan Auditorium, KARE (Kalasalingam Academy of Research and Education), Krishnankoil, Tamil Nadu — offline.",
+        "Hack Odyssey 4.0 will be held at Central Library, KARE (Kalasalingam Academy of Research and Education), Krishnankoil, Tamil Nadu — offline.",
     },
     {
       question: "Will I receive a confirmation after registration?",

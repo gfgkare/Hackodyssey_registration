@@ -36,7 +36,7 @@ export default function Hero({ onRegisterClick }: HeroProps) {
     { icon: <Calendar size={18} />, label: "Date", value: eventConfig.eventDate },
     { icon: <MapPin size={18} />, label: "Venue", value: "Kalasalingam University" },
     { icon: <Users size={18} />, label: "Teams", value: eventConfig.teamSize },
-    { icon: <Award size={18} />, label: "Registration Fee", value: "₹300 / Member" },
+    { icon: <Award size={18} />, label: "SDG Goals", value: "6 SDG's Goals Covered" },
   ];
 
   return (
