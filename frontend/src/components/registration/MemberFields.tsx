@@ -2,6 +2,7 @@ import type {
   RegistrationCategory,
   TeamMember,
 } from "../../types/registration";
+
 import GlassCard from "../ui/GlassCard";
 
 interface MemberFieldsProps {
@@ -120,13 +121,23 @@ export default function MemberFields({
     updateField("wardenContact", value.replace(/\D/g, "").slice(0, 10));
   };
 
+  const handleAccommodationChange = (value: string) => {
+    updateField("accommodationType", value);
+
+    if (value === "DAY_SCHOLAR") {
+      updateField("hostelName", "");
+      updateField("roomNumber", "");
+      updateField("wardenName", "");
+      updateField("wardenContact", "");
+    }
+  };
+
   return (
     <GlassCard className="p-5 sm:p-6">
+      {/* Member Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">
-            Team Member
-          </p>
+          
 
           <h3 className="mt-1 text-xl font-bold text-white">
             Member {index + 1}
@@ -144,6 +155,7 @@ export default function MemberFields({
         </span>
       </div>
 
+      {/* Basic Member Details */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <InputField
           label="Full Name"
@@ -178,9 +190,7 @@ export default function MemberFields({
         <InputField
           label="Email Address"
           value={member.email}
-          placeholder={
-            isKLU ? "example@klu.ac.in" : "example@gmail.com"
-          }
+          placeholder={isKLU ? "example@klu.ac.in" : "example@gmail.com"}
           type="email"
           required
           onChange={(value) => updateField("email", value)}
@@ -219,6 +229,7 @@ export default function MemberFields({
           onChange={(value) => updateField("academicYear", value)}
         />
 
+        {/* Department */}
         <InputField
           label="Department"
           value={member.department}
@@ -226,70 +237,97 @@ export default function MemberFields({
           required
           onChange={(value) => updateField("department", value)}
         />
+
+        {/* Accommodation */}
+        {isKLU && (
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-300">
+              Accommodation Type{" "}
+              <span className="ml-1 text-blue-400">*</span>
+            </label>
+
+            <div className="flex min-h-[48px] flex-wrap items-center gap-6 py-3">
+              {/* Day Scholar */}
+              <label className="group flex cursor-pointer items-center gap-3">
+                <input
+                  type="radio"
+                  name={`accommodation-${index}`}
+                  value="DAY_SCHOLAR"
+                  checked={member.accommodationType === "DAY_SCHOLAR"}
+                  onChange={(event) =>
+                    handleAccommodationChange(event.target.value)
+                  }
+                  className="h-5 w-5 cursor-pointer accent-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                />
+
+                <span className="text-sm font-medium text-slate-300 transition-colors group-hover:text-white">
+                  Day Scholar
+                </span>
+              </label>
+
+              {/* Hostler */}
+              <label className="group flex cursor-pointer items-center gap-3">
+                <input
+                  type="radio"
+                  name={`accommodation-${index}`}
+                  value="HOSTELLER"
+                  checked={member.accommodationType === "HOSTELLER"}
+                  onChange={(event) =>
+                    handleAccommodationChange(event.target.value)
+                  }
+                  className="h-5 w-5 cursor-pointer accent-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                />
+
+                <span className="text-sm font-medium text-slate-300 transition-colors group-hover:text-white">
+                  Hostler
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
       </div>
 
-      {isKLU && (
+      {/* Hosteller Details */}
+      {isKLU && isHosteller && (
         <div className="mt-7 border-t border-white/10 pt-6">
           <h4 className="mb-4 text-lg font-semibold text-white">
-            Accommodation Details
+            Hosteller Details
           </h4>
 
-          <SelectField
-            label="Accommodation Type"
-            value={member.accommodationType ?? ""}
-            required
-            options={[
-              { label: "Day Scholar", value: "DAY_SCHOLAR" },
-              { label: "Hosteller", value: "HOSTELLER" },
-            ]}
-            onChange={(value) => {
-              updateField("accommodationType", value);
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <InputField
+              label="Hostel Name"
+              value={member.hostelName ?? ""}
+              placeholder="Enter hostel name"
+              required
+              onChange={(value) => updateField("hostelName", value)}
+            />
 
-              if (value === "DAY_SCHOLAR") {
-                updateField("hostelName", "");
-                updateField("roomNumber", "");
-                updateField("wardenName", "");
-                updateField("wardenContact", "");
-              }
-            }}
-          />
+            <InputField
+              label="Room Number"
+              value={member.roomNumber ?? ""}
+              placeholder="Enter room number"
+              required
+              onChange={(value) => updateField("roomNumber", value)}
+            />
 
-          {isHosteller && (
-            <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-              <InputField
-                label="Hostel Name"
-                value={member.hostelName ?? ""}
-                placeholder="Enter hostel name"
-                required
-                onChange={(value) => updateField("hostelName", value)}
-              />
+            <InputField
+              label="Warden Name"
+              value={member.wardenName ?? ""}
+              placeholder="Enter warden name"
+              required
+              onChange={(value) => updateField("wardenName", value)}
+            />
 
-              <InputField
-                label="Room Number"
-                value={member.roomNumber ?? ""}
-                placeholder="Enter room number"
-                required
-                onChange={(value) => updateField("roomNumber", value)}
-              />
-
-              <InputField
-                label="Warden Name"
-                value={member.wardenName ?? ""}
-                placeholder="Enter warden name"
-                required
-                onChange={(value) => updateField("wardenName", value)}
-              />
-
-              <InputField
-                label="Warden Contact"
-                value={member.wardenContact ?? ""}
-                placeholder="Enter 10-digit contact number"
-                type="tel"
-                required
-                onChange={handleWardenContactChange}
-              />
-            </div>
-          )}
+            <InputField
+              label="Warden Contact"
+              value={member.wardenContact ?? ""}
+              placeholder="Enter 10-digit contact number"
+              type="tel"
+              required
+              onChange={handleWardenContactChange}
+            />
+          </div>
         </div>
       )}
     </GlassCard>
