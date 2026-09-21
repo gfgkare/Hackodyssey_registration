@@ -283,7 +283,7 @@ export default function EventDetails() {
                     "0 4px 20px rgba(245, 158, 11, 0.4)";
                 }}
               >
-                Register Your Team (₹300 / Member) →
+                Register Your Team →
               </button>
             </div>
           </div>

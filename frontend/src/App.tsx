@@ -26,32 +26,7 @@ function MobileRegisterCTA() {
   const navigate = useNavigate();
   return (
     <>
-      <button
-        onClick={() => navigate("/register")}
-        style={{
-          position: "fixed",
-          bottom: "1.25rem",
-          left: "1rem",
-          right: "1rem",
-          zIndex: 900,
-          display: "none",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--color-accent)",
-          color: "#ffffff",
-          fontFamily: "Poppins, sans-serif",
-          fontWeight: 700,
-          fontSize: "1rem",
-          padding: "0.9375rem",
-          borderRadius: "var(--radius-lg)",
-          border: "none",
-          cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(245,158,11,0.4)",
-        }}
-        className="mobile-cta-btn"
-      >
-        Register Now — ₹300 / Member
-      </button>
+      
       <style>{`
         @media (max-width: 768px) {
           .mobile-cta-btn { display: flex !important; }
