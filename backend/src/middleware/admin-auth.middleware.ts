@@ -20,7 +20,16 @@ export function adminAuthMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  const token = req.cookies?.admin_token;
+  let token: string | undefined;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.substring(7).trim();
+  }
+
+  if (!token) {
+    token = req.cookies?.admin_token;
+  }
 
   if (!token) {
     res.status(401).json({

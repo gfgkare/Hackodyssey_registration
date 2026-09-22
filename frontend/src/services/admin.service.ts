@@ -5,10 +5,25 @@ export interface AdminLoginPayload {
   password: string;
 }
 
+const ADMIN_TOKEN_KEY = "admin_token";
+
+export function getAdminToken(): string | null {
+  return localStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+export function setAdminToken(token: string): void {
+  localStorage.setItem(ADMIN_TOKEN_KEY, token);
+}
+
+export function clearAdminToken(): void {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
 export interface AdminUser {
   id?: string;
   username?: string;
   adminId?: string;
+  token?: string;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -25,6 +40,10 @@ export async function loginAdmin(
     payload
   );
 
+  if (response.data?.data?.token) {
+    setAdminToken(response.data.data.token);
+  }
+
   return response.data;
 }
 
@@ -37,9 +56,12 @@ export async function verifyAdminSession(): Promise<
 }
 
 export async function logoutAdmin(): Promise<ApiResponse> {
-  const response = await api.post<ApiResponse>("/auth/logout");
-
-  return response.data;
+  try {
+    const response = await api.post<ApiResponse>("/auth/logout");
+    return response.data;
+  } finally {
+    clearAdminToken();
+  }
 }
 
 export async function getAdminRegistrations() {

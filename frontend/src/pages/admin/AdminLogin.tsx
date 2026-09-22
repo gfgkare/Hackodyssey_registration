@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LockKeyhole, ShieldCheck, User } from "lucide-react";
-import { loginAdmin } from "../../services/admin.service";
+import { loginAdmin, verifyAdminSession, getAdminToken } from "../../services/admin.service";
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -12,6 +12,21 @@ function AdminLogin() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const checkExistingSession = async () => {
+      try {
+        await verifyAdminSession();
+        navigate("/gfghackadmin/dashboard", { replace: true });
+      } catch {
+        // Not authenticated, stay on login page
+      }
+    };
+
+    if (getAdminToken()) {
+      void checkExistingSession();
+    }
+  }, [navigate]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

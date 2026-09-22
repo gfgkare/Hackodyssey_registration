@@ -118,6 +118,7 @@ export async function loginAdmin(
       data: {
         id: admin.id,
         username: admin.username,
+        token,
       },
     });
   } catch (error) {
