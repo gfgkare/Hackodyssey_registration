@@ -151,7 +151,7 @@ export default function RegistrationSection() {
                   marginTop: "0.125rem",
                 }}
               >
-                Fill in details for all team members (4 – 5 members per team)
+                Fill in details for all team members (2 – 5 members per team)
               </div>
             </div>
             <span

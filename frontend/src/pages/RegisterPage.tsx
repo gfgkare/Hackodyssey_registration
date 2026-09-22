@@ -197,7 +197,7 @@ export default function RegisterPage() {
               lineHeight: 1.65,
             }}
           >
-            Fill in your team details below. Each team must have 4 or 5 members.
+            Fill in your team details below. Each team must have 2 to 5 members.
             Registration fee is {eventConfig.registrationFee}. Open to all college
             students across India.
           </p>

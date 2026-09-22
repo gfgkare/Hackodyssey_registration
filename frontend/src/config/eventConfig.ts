@@ -25,7 +25,7 @@ export const eventConfig = {
 
   // ── Eligibility & Fees ───────────────────────────────────
   eligibility: "Open to all college students across India",
-  teamSize: "4 – 5 Members per Team",
+  teamSize: "2 – 5 Members per Team",
   registrationFee: "₹300 per Member",
   prizePool: "Up to ₹1,00,000",
   participation: "Team (Offline)",
@@ -76,7 +76,7 @@ export const eventConfig = {
       id: "gfg",
       name: "GFG Campus Body KARE",
       shortName: "GFG",
-      logo: "/gfg.jpeg",
+      logo: "/gfg.png",
       description:
         "GFG Campus Body KARE — organizing Euphoria 2026, a Techno Management Meet focused on Sustainability.",
       initials: "KARE",
@@ -165,7 +165,7 @@ export const eventConfig = {
     {
       question: "What is the team size?",
       answer:
-        "Each team must have 4 or 5 members. Solo registrations are not allowed.",
+        "Each team must have 2 to 5 members. Solo registrations are not allowed.",
     },
     {
       question: "Can teams have members from different colleges?",
@@ -175,7 +175,7 @@ export const eventConfig = {
     {
       question: "What is the registration fee?",
       answer:
-        "The registration fee is ₹300 per member. For a team of 4, that's ₹1200 total; for a team of 5, that's ₹1500 total.",
+        "The registration fee is ₹300 per member (e.g., ₹600 for 2 members, ₹900 for 3, ₹1200 for 4, and ₹1500 for 5 members).",
     },
     {
       question: "What is the prize pool?",

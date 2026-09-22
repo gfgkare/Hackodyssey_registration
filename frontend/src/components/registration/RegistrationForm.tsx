@@ -41,7 +41,7 @@ function createInitialMembers(size: number): TeamMember[] {
 }
 
 function RegistrationForm() {
-  const [teamSize, setTeamSize] = useState<4 | 5>(4);
+  const [teamSize, setTeamSize] = useState<2 | 3 | 4 | 5>(4);
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     teamName: "",
@@ -82,7 +82,7 @@ function RegistrationForm() {
     });
   }
 
-  function handleTeamSizeChange(size: 4 | 5) {
+  function handleTeamSizeChange(size: 2 | 3 | 4 | 5) {
     setTeamSize(size);
     setFormData((prev) => {
       let members = [...prev.members];
@@ -130,8 +130,8 @@ function RegistrationForm() {
       setMessage("Please enter a team name.");
       return;
     }
-    if (formData.members.length !== 4 && formData.members.length !== 5) {
-      setMessage("A team must contain exactly 4 or 5 members.");
+    if (formData.members.length < 2 || formData.members.length > 5) {
+      setMessage("A team must contain between 2 and 5 members.");
       return;
     }
     if (!formData.category) {
@@ -523,13 +523,13 @@ function RegistrationForm() {
                   marginTop: "0.125rem",
                 }}
               >
-                Choose 4 or 5 team members (as per hackathon rules)
+                Choose 2, 3, 4, or 5 team members (as per hackathon rules)
               </p>
             </div>
           </div>
 
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            {([4, 5] as const).map((size) => {
+            {([2, 3, 4, 5] as const).map((size) => {
               const isSelected = teamSize === size;
               return (
                 <button

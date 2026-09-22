@@ -233,7 +233,7 @@ export default function Footer() {
               color: "rgba(255,255,255,0.4)",
             }}
           >
-            © {new Date().getFullYear()} Kalasalingam University. All rights reserved.
+            © {new Date().getFullYear()} GFG Campus Body KARE. All rights reserved.
           </p>
           <div style={{ display: "flex", gap: "1.5rem" }}>
             {legalLinks.map((link) => (

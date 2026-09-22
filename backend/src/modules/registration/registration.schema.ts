@@ -149,8 +149,8 @@ export const registrationSchema = z
     members: z
       .array(memberSchema)
       .refine(
-        (members) => members.length === 4 || members.length === 5,
-        "A team must contain exactly 4 or 5 members"
+        (members) => members.length >= 2 && members.length <= 5,
+        "A team must contain between 2 and 5 members"
       )
       .refine(
         (members) =>
@@ -159,8 +159,8 @@ export const registrationSchema = z
       )
       .refine(
         (members) =>
-          members.filter((member) => member.role === "MEMBER").length >= 3,
-        "A team must have at least 3 members besides the leader"
+          members.filter((member) => member.role === "MEMBER").length >= 1,
+        "A team must have at least 1 member besides the leader"
       ),
   })
   .superRefine((data, context) => {
