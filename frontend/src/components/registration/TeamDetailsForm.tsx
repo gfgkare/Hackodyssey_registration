@@ -221,7 +221,20 @@ export default function TeamDetailsForm({
             </>
           ) : (
             <>
-              <strong>External Participants:</strong> Welcome! Enter your college name and Euphoria format ID (e.g. EUPH-26-XXXXXX) or home college roll number.
+              <strong>External Participants:</strong> Welcome! Enter your college name and Euphoria format ID (e.g. EUPH-26-XXXXXX). Find your Euphoria ID on the{" "}
+              <a
+                href="https://euphoria.kalasalingam.ac.in/dashboard"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: "#fbbf24",
+                  textDecoration: "underline",
+                  fontWeight: 600,
+                }}
+              >
+                Euphoria Dashboard
+              </a>
+              .
             </>
           )}
         </p>

@@ -2,7 +2,7 @@ import type {
   RegistrationCategory,
   TeamMember,
 } from "../../types/registration";
-import { User, Mail, Phone, BookOpen, Home, Building, Crown } from "lucide-react";
+import { User, Mail, Phone, BookOpen, Home, Building, Crown, ExternalLink } from "lucide-react";
 
 interface MemberFieldsProps {
   member: TeamMember;
@@ -170,21 +170,77 @@ export default function MemberFields({
 
             <FormField
               id={`regnum-${index}`}
-              label="Registration Number"
+              label={isKLU ? "Registration Number" : "Registration Number / Euphoria ID"}
               required
               icon={<BookOpen size={14} />}
+              extra={
+                !isKLU ? (
+                  <a
+                    href="https://euphoria.kalasalingam.ac.in/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontFamily: "Inter, sans-serif",
+                      fontSize: "0.75rem",
+                      color: "var(--color-accent)",
+                      textDecoration: "none",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.25rem",
+                      fontWeight: 600,
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = "underline")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.textDecoration = "none")}
+                  >
+                    Get Euphoria ID
+                    <ExternalLink size={12} />
+                  </a>
+                ) : undefined
+              }
             >
               <input
                 id={`regnum-${index}`}
                 type="text"
                 value={member.registrationNumber}
                 onChange={(e) => handleRegNumChange(e.target.value)}
-                placeholder={isKLU ? "e.g. 992XXXXXXXX" : "e.g. EUPH-26-XXXXXX / College ID"}
+                placeholder={isKLU ? "e.g. 992XXXXXXXX" : "e.g. EUPH-26-XXXXXX"}
                 required
                 style={inputStyle}
                 onFocus={onFocusStyle}
                 onBlur={onBlurStyle}
               />
+              {!isKLU && (
+                <div
+                  style={{
+                    marginTop: "0.375rem",
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "0.75rem",
+                    color: "rgba(147, 197, 253, 0.85)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span>Refer Euphoria ID:</span>
+                  <a
+                    href="https://euphoria.kalasalingam.ac.in/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "var(--color-accent)",
+                      textDecoration: "underline",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.2rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    euphoria.kalasalingam.ac.in/dashboard
+                    <ExternalLink size={11} />
+                  </a>
+                </div>
+              )}
             </FormField>
           </div>
 
@@ -547,34 +603,46 @@ function FormField({
   label,
   required,
   icon,
+  extra,
   children,
 }: {
   id: string;
   label: string;
   required?: boolean;
   icon?: React.ReactNode;
+  extra?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label
-        htmlFor={id}
+      <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: "0.375rem",
-          fontFamily: "Inter, sans-serif",
-          fontSize: "0.8125rem",
-          fontWeight: 600,
-          color: "rgba(226, 232, 240, 0.9)",
+          justifyContent: "space-between",
           marginBottom: "0.4375rem",
-          letterSpacing: "0.01em",
+          gap: "0.5rem",
         }}
       >
-        {icon && <span style={{ color: "var(--color-accent)", display: "flex" }}>{icon}</span>}
-        {label}
-        {required && <span style={{ color: "#f87171" }}>*</span>}
-      </label>
+        <label
+          htmlFor={id}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            fontFamily: "Inter, sans-serif",
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            color: "rgba(226, 232, 240, 0.9)",
+            letterSpacing: "0.01em",
+          }}
+        >
+          {icon && <span style={{ color: "var(--color-accent)", display: "flex" }}>{icon}</span>}
+          {label}
+          {required && <span style={{ color: "#f87171" }}>*</span>}
+        </label>
+        {extra}
+      </div>
       {children}
     </div>
   );

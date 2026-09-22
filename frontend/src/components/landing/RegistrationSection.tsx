@@ -101,8 +101,17 @@ export default function RegistrationSection() {
           >
             <strong style={{ color: "#93c5fd" }}>KLU Students:</strong> Use your @klu.ac.in email and numeric
             registration number. &nbsp;
-            <strong style={{ color: "var(--color-accent)" }}>External Participants:</strong> Use the
-            format&nbsp;<code style={{ background: "rgba(6, 16, 42, 0.8)", border: "1px solid rgba(245, 158, 11, 0.4)", color: "#fbbf24", padding: "0.15rem 0.4rem", borderRadius: 4 }}>EUPH-26-XXXXXX</code>&nbsp;or your official College ID.
+            <strong style={{ color: "var(--color-accent)" }}>External Participants:</strong> Use Euphoria ID
+            format&nbsp;<code style={{ background: "rgba(6, 16, 42, 0.8)", border: "1px solid rgba(245, 158, 11, 0.4)", color: "#fbbf24", padding: "0.15rem 0.4rem", borderRadius: 4 }}>EUPH-26-XXXXXX</code>&nbsp;(find it on the{" "}
+            <a
+              href="https://euphoria.kalasalingam.ac.in/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#fbbf24", textDecoration: "underline", fontWeight: 600 }}
+            >
+              Euphoria Dashboard
+            </a>
+            ).
           </p>
         </div>
 
